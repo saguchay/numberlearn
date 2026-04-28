@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counting Fun: English & Nepali</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Split Section Styling */
+        .lang-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-bottom: 4px solid #ddd;
+        }
+
+        .en-section { background-color: #e3f2fd; } /* Light Blue */
+        .ne-section { background-color: #fce4ec; } /* Light Red/Pink */
+
+        /* Object Display Area */
+        .stage {
+            height: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 10px;
+        }
+
+        .emoji-item {
+            font-size: 2.5rem;
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .label {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Grid for Buttons */
+        .num-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn {
+            aspect-ratio: 1/1;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border: 4px solid white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.1s, box-shadow 0.1s;
+            color: white;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .en-btn { background: #1e88e5; }
+        .ne-btn { background: #d81b60; }
+
+        /* Desktop Optimization */
+        @media (min-width: 800px) {
+            body { flex-direction: row; }
+            .lang-section { border-bottom: none; border-right: 4px solid #ddd; height: 100vh; }
+            .num-grid { grid-template-columns: repeat(2, 1fr); max-width: 250px; }
+            .stage { height: 200px; }
+        }
+
+        /* Small Mobile Optimization */
+        @media (max-width: 400px) {
+            .btn { font-size: 1.2rem; border-radius: 10px; }
+            .emoji-item { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-section en-section">
+        <div class="label" id="en-text">English Numbers</div>
+        <div id="en-stage" class="stage">
+            <span style="color: #999; font-size: 1rem;">Tap a blue number!</span>
+        </div>
+        <div class="num-grid" id="en-grid"></div>
+    </div>
+
+    <div class="lang-section ne-section">
+        <div class="label" id="ne-text">नेपाली अंकहरू</div>
+        <div id="ne-stage" class="stage">
+            <span style="color: #999; font-size: 1rem;">अंक थिच्नुहोस्!</span>
+        </div>
+        <div class="num-grid" id="ne-grid"></div>
+    </div>
+
+    <script>
+        const enNums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        const neNums = ['१', '२', '३', '४', '५', '६', '७', '८', '९', '१०'];
+        const neWords = ['एक', 'दुई', 'तीन', 'चार', 'पाँच', 'छ', 'सात', 'आठ', 'नौ', 'दश'];
+        
+        // Fun icons for kids
+        const icons = ['🍎', '🚗', '🎈', '🐶', '🐥', '🌟', '🍭', '🦁', '🍦', '⚽'];
+
+        function play(num, lang) {
+            const stageId = lang === 'en' ? 'en-stage' : 'ne-stage';
+            const textId = lang === 'en' ? 'en-text' : 'ne-text';
+            const stage = document.getElementById(stageId);
+            const label = document.getElementById(textId);
+
+            // 1. Voice
+            window.speechSynthesis.cancel();
+            const voiceText = lang === 'en' ? num.toString() : neWords[num - 1];
+            const msg = new SpeechSynthesisUtterance(voiceText);
+            msg.lang = lang === 'en' ? 'en-US' : 'ne-NP';
+            window.speechSynthesis.speak(msg);
+
+            // 2. Update Label
+            label.innerText = lang === 'en' ? `Number ${num}` : `${neWords[num-1]} (${neNums[num-1]})`;
+
+            // 3. Update Visual Stage
+            stage.innerHTML = '';
+            const icon = icons[num - 1];
+            for (let i = 0; i < num; i++) {
+                const span = document.createElement('span');
+                span.className = 'emoji-item';
+                span.innerText = icon;
+                span.style.animationDelay = (i * 0.05) + 's';
+                stage.appendChild(span);
+            }
+        }
+
+        // Initialize English Buttons
+        const enGrid = document.getElementById('en-grid');
+        enNums.forEach(n => {
+            const b = document.createElement('div');
+            b.className = 'btn en-btn';
+            b.innerText = n;
+            b.onclick = () => play(n, 'en');
+            enGrid.appendChild(b);
+        });
+
+        // Initialize Nepali Buttons
+        const neGrid = document.getElementById('ne-grid');
+        neNums.forEach((n, index) => {
+            const b = document.createElement('div');
+            b.className = 'btn ne-btn';
+            b.innerText = n;
+            b.onclick = () => play(index + 1, 'ne');
+            neGrid.appendChild(b);
+        });
+    </script>
+</body>
+</html>
